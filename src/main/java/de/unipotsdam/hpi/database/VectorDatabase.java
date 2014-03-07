@@ -15,6 +15,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import de.unipotsdam.hpi.indexing.BlockBasedIndex;
 import de.unipotsdam.hpi.indexing.Index;
@@ -41,6 +42,8 @@ import de.unipotsdam.hpi.util.Profiler;
  */
 public class VectorDatabase {
 
+  private static final Logger logger = Logger.getLogger(VectorDatabase.class.getName());
+  
   // recovery file names
 	private static final String INDEXES_FILE = "indexes.ser";
 	private static final String LSH_FUNCTION_FILE = "lsh-func.ser";
@@ -97,7 +100,7 @@ public class VectorDatabase {
 		this.vectorSize = settings.getInputVectorSize();
 
 		if (bitSignatureSize % BitSignatureUtil.BASE_TYPE_SIZE != 0) {
-			System.out.println("Warning: Non-aligned bit-signature size: "
+		  logger.warning("Warning: Non-aligned bit-signature size: "
 					+ bitSignatureSize + "!");
 		}
 	}
@@ -118,7 +121,6 @@ public class VectorDatabase {
 			storagePath = basePath.resolve(SIGNATURE_STORAGE_PATH);
 			indexPath = basePath.resolve(INDEX_PATH);
 			FileUtils.createDirectoryIfNotExists(basePath);
-			FileUtils.createDirectoryIfNotExists(storagePath);
 			FileUtils.createDirectoryIfNotExists(indexPath);
 
 			// LSH function
@@ -129,7 +131,7 @@ public class VectorDatabase {
 
 			// Signature store
 			signatureStorage = saveBitSignatures ? new BitSignatureDiskStorage(
-					basePath, bitSignatureSize, false)
+			    storagePath, bitSignatureSize, false)
 					: new BitSignatureInMemoryStorage();
 
 			// Permutation functions
@@ -198,7 +200,7 @@ public class VectorDatabase {
 					// Profiler.stop(PK_SIGNATURE_STORE_SAVING);
 
 					if (size % 20000 == 0) {
-						System.out.println("Processed " + size + " elements.");
+					  logger.info("Processed " + size + " elements.");
 					}
 
 				}
@@ -238,7 +240,7 @@ public class VectorDatabase {
 			Profiler.stop(PK_SIGNATURE_STORE_SAVING);
 
 			if (size % 20000 == 0) {
-				System.out.println("Processed " + size + " elements.");
+			  logger.info("Processed " + size + " elements.");
 			}
 
 		}
@@ -324,7 +326,7 @@ public class VectorDatabase {
 		index.bulkLoad(permutatedElements);
 		indexes[i] = index;
 		Profiler.stop(PK_INDEX_CREATION);
-		System.out.println("Created index " + i + ".");
+		logger.info("Created index " + i + ".");
 	}
 
 	private void storeRecoverInformation() throws FileNotFoundException,
@@ -371,7 +373,7 @@ public class VectorDatabase {
 		recoverPath = FileUtils.toPath(basePath, LSH_FUNCTION_FILE).toString();
 		lshFunction = (LshFunction) FileUtils.load(recoverPath);
 
-		System.out.println("LshFunction: " + lshFunction.toString());
+		logger.info("LshFunction: " + lshFunction.toString());
 	}
 
 	public void deleteFiles() {
@@ -381,8 +383,7 @@ public class VectorDatabase {
 
 	public Int2DoubleMap getNearNeighborsWithDistance(InputVector queryVector,
 			int beamRadius, double minSimilarity) {
-		System.out.println("Query with beam " + beamRadius
-				+ " and min similarity " + minSimilarity);
+	  logger.info("Query with beam " + beamRadius	+ " and min similarity " + minSimilarity);
 		Profiler.start("Find nearest neighbors");
 
 		// create the signature of the input vector
@@ -403,9 +404,6 @@ public class VectorDatabase {
 
 			// store the neighbors that are close enough
 			for (IndexPair neighbor : neighbors) {
-				// TODO remove if not needed
-				// if (neighbor.getElementId() == queryVector.getId())
-				// System.out.println("");
 				if (seenElements.add(neighbor.getElementId())) {
 					double similarity = BitSignatureUtil
 							.calculateBitVectorCosine(permutedSignature,

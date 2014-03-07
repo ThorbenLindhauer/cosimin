@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import de.unipotsdam.hpi.util.BitSignatureUtil;
 import de.unipotsdam.hpi.util.EncodingUtils;
@@ -26,6 +27,8 @@ import de.unipotsdam.hpi.util.EncodingUtils;
 public class CachingBlock extends AbstractLinkedBlock implements Serializable {
 	
 	private static final long serialVersionUID = 8965038039252466052L;
+	
+	private static final Logger logger = Logger.getLogger(CachingBlock.class.getName());
 
 	private static AtomicInteger hitCount = new AtomicInteger();
 	private static AtomicInteger missCount = new AtomicInteger();
@@ -264,7 +267,7 @@ public class CachingBlock extends AbstractLinkedBlock implements Serializable {
 		int misses = missCount.get();
 		
 		double accesses = hits + misses;
-		System.out.format("Hit rate:  %3.3f (%4d)\n", hits / accesses, hits);
+		logger.info(String.format("Hit rate:  %3.3f (%4d)\n", hits / accesses, hits));
 	}
 
 	public void recover() {

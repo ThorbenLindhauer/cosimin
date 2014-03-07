@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Logger;
 
 
 /**
@@ -17,6 +18,8 @@ import java.util.Set;
  * fields will be automatically loaded with the right property.
  */
 abstract public class AbstractSettings {
+  
+  private static final Logger logger = Logger.getLogger(AbstractSettings.class.getName());
 
 	public void load(String propertiesPath) {
 		Properties properties = new Properties();
@@ -34,8 +37,8 @@ abstract public class AbstractSettings {
 	 * in the given properties, it remains as it is.
 	 */
 	public void load(Properties properties) {
-		System.out.println("Reading settings from properties:");
-		System.out.println(properties);
+	  logger.info("Reading settings from properties:");
+	  logger.info(properties.toString());
 
 		Set<String> usedProperties = new HashSet<String>();
 		List<Class<?>> hierarchy = new ArrayList<Class<?>>();

@@ -2,6 +2,7 @@ package de.unipotsdam.hpi.benchmark;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 import de.unipotsdam.hpi.database.Settings;
 import de.unipotsdam.hpi.database.VectorDatabase;
@@ -16,6 +17,8 @@ import de.unipotsdam.hpi.util.LimitingIterator;
 public class VectorDatabaseStreamingBenchmark extends
 		AbstractVectorDatabaseBenchmark {
 
+  private static final Logger logger = Logger.getLogger(VectorDatabaseStreamingBenchmark.class.getName());
+  
 	public VectorDatabaseStreamingBenchmark(Settings settings, BenchmarkSettings benchmarkSettings) {
 		super(settings, benchmarkSettings);
 	}
@@ -36,7 +39,7 @@ public class VectorDatabaseStreamingBenchmark extends
 
 	public static void main(String[] args) throws IOException {
 		if (args.length < 1) {
-			System.out.println("Some stuff about usage and parameters");
+		  logger.info("Some stuff about usage and parameters");
 			return;
 		}
 

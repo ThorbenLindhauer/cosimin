@@ -1,6 +1,7 @@
 package de.unipotsdam.hpi.lsh;
 
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,10 +12,10 @@ import de.unipotsdam.hpi.util.BitSignatureUtil;
 
 public class CosineSimilarityApproximationTest {
 
+  private static final Logger logger = Logger.getLogger(CosineSimilarityApproximationTest.class.getName());
+  
 	@Test
 	public void testCosineSimilarityApproximation() {
-//		Assert.fail("Pending.");
-		
 		// Test parameters.
 		final int VECTOR_SIZE = 100000;
 		final int VECTOR_COMPONENT_RANGE = 100;
@@ -41,7 +42,7 @@ public class CosineSimilarityApproximationTest {
 			double estimatedCosSim = BitSignatureUtil.calculateBitVectorCosine(
 					signature1, signature2);
 			
-			System.out.println(actualCosSim+ " - "+estimatedCosSim);
+			logger.info(actualCosSim+ " - "+estimatedCosSim);
 			double delta = actualCosSim - estimatedCosSim;
 			rmse += delta * delta;
 			
@@ -85,7 +86,6 @@ public class CosineSimilarityApproximationTest {
 			double estimatedCosSim = BitSignatureUtil.calculateBitVectorCosine(
 					signature1, signature2);
 			
-			// System.out.println(actualCosSim+ " - "+estimatedCosSim);
 			double delta = actualCosSim - estimatedCosSim;
 			rmse += delta * delta;
 			

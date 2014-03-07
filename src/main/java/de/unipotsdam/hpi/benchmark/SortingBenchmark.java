@@ -1,6 +1,7 @@
 package de.unipotsdam.hpi.benchmark;
 
 import java.util.Random;
+import java.util.logging.Logger;
 
 import de.unipotsdam.hpi.sorting.ParallelQuickSort;
 import de.unipotsdam.hpi.sorting.SortAlgorithm;
@@ -10,6 +11,8 @@ import de.unipotsdam.hpi.util.Profiler;
 
 public class SortingBenchmark {
 
+  private static final Logger logger = Logger.getLogger(SortingBenchmark.class.getName());
+  
 	private IndexBenchmarkSettings settings;
 
 	public SortingBenchmark(IndexBenchmarkSettings settings) {
@@ -40,7 +43,7 @@ public class SortingBenchmark {
 	}
 	
 	private long[][] generateBitSignatures() {
-		System.out.println("Generating random bit signatures");
+	  logger.info("Generating random bit signatures");
 		Profiler.start("Generating random bit signatures.");
 
 		int numBitSignatures = settings.getNumBitSignatures();

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 import de.unipotsdam.hpi.database.Settings;
 import de.unipotsdam.hpi.database.VectorDatabase;
@@ -20,6 +21,8 @@ import de.unipotsdam.hpi.util.ReservoirSampler;
 
 public abstract class AbstractVectorDatabaseBenchmark {
 
+  private static final Logger logger = Logger.getLogger(AbstractVectorDatabaseBenchmark.class.getName());
+  
 	protected static final String PK_GET_VECTORS = "Get Vectors";
 	protected static final String PK_BULK_LOAD = "Bulk Load";
 	protected static final String PK_ASYNC_EXEC_QUERIES = "Execute async queries";
@@ -127,7 +130,7 @@ public abstract class AbstractVectorDatabaseBenchmark {
 
 	private void executeAsyncRandomQueries(VectorDatabase vectorDB,
 			List<InputVector> baseVectors) {
-		System.out.println("Executing async queries");
+	  logger.info("Executing async queries");
 
 		ExecutorService executorService = Executors.newFixedThreadPool(benchmarkSettings.getNumQueryThreads());
 		
@@ -163,12 +166,12 @@ public abstract class AbstractVectorDatabaseBenchmark {
 
 		String formatTime = Profiler.formatTime(Profiler
 				.getTime(PK_ASYNC_EXEC_QUERIES) / benchmarkSettings.getNumQueries());
-		System.out.println("Average execution time: " + formatTime);
+		logger.info("Average execution time: " + formatTime);
 	}
 
 	private void executeSyncRandomQueries(VectorDatabase vectorDB,
 			List<InputVector> baseVectors) {
-		System.out.println("Executing sync queries");
+	  logger.info("Executing sync queries");
 
 		for (InputVector baseVector : baseVectors) {
 			// InputVector queryVector = IntArrayInputVector.mutateVector(
@@ -182,12 +185,12 @@ public abstract class AbstractVectorDatabaseBenchmark {
 					    benchmarkSettings.getBeamSize(), benchmarkSettings.getMinSimilarity());
 			Profiler.stop(PK_SYNC_EXEC_QUERIES);
 
-			System.out.println(baseVector.getId());
-			System.out.println(nearNeighborsWithDistance);
+			logger.info(String.format("%d", baseVector.getId()));
+			logger.info(nearNeighborsWithDistance.toString());
 		}
 
 		String formatTime = Profiler.formatTime(Profiler
 				.getTime(PK_SYNC_EXEC_QUERIES) / benchmarkSettings.getNumQueries());
-		System.out.println("Average execution time: " + formatTime);
+		logger.info("Average execution time: " + formatTime);
 	}
 }

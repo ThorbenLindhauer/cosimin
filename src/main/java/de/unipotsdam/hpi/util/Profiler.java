@@ -2,6 +2,7 @@ package de.unipotsdam.hpi.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Profiler for measuring execution times. Offers static methods to ease access
@@ -11,6 +12,8 @@ import java.util.Map;
  * 
  */
 public class Profiler {
+
+  private static final Logger logger = Logger.getLogger(Profiler.class.getName());
 
 	private static Map<String, Record> records = new HashMap<String, Record>();
 
@@ -57,11 +60,13 @@ public class Profiler {
 	 * Prints the measurements to the standard output.
 	 */
 	public static void printMeasurements() {
-		System.out.println("Profiler Results:");
+	  StringBuilder profilerResults = new StringBuilder();
+	  profilerResults.append("Profiler Results:\n");
 		for (Map.Entry<String, Record> entry : records.entrySet()) {
-			System.out.format("%40s %s\n", entry.getKey(),
-					formatTime(entry.getValue().accumulatedTime));
+		  profilerResults.append(String.format("%40s %s\n", entry.getKey(),
+					formatTime(entry.getValue().accumulatedTime)));
 		}
+		logger.info(profilerResults.toString());
 	}
 
 	public static String formatTime(long time) {

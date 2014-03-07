@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import de.unipotsdam.hpi.sparse.DefaultSparseIntList;
 import de.unipotsdam.hpi.sparse.IntArraySparseIntList;
@@ -14,6 +15,8 @@ import de.unipotsdam.hpi.util.RandomNumberSampler;
 
 public class DotProductBenchmark {
 
+  private static final Logger logger = Logger.getLogger(DotProductBenchmark.class.getName());
+  
 	private static final String NAIVE_DOT_PRODUCT = "Naive Dot Product";
 	private static final String SPARSE_INT_LIST_DOT_PRODUCT = "Sparse Int List";
 	
@@ -125,7 +128,7 @@ public class DotProductBenchmark {
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
-			System.out.println("Some stuff about usage and parameters");
+			logger.severe("Some stuff about usage and parameters");
 			return;
 		}
 		

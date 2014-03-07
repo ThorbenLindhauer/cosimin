@@ -13,8 +13,11 @@ import java.io.ObjectOutputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Logger;
 
 public class FileUtils {
+  
+  private static final Logger logger = Logger.getLogger(FileUtils.class.getName());
 
 	public static void createDirectoryIfNotExists(Path directoryPath)
 			throws IOException {
@@ -109,9 +112,9 @@ public class FileUtils {
 			in = createObjectInputStreamTo(path);
 			o = in.readObject();
 		} catch (EOFException e) {
-			System.out.println("Warning: " + e.getMessage());
+		  logger.warning("Warning: " + e.getMessage());
 		} catch (FileNotFoundException e) {
-			System.out.println("Warning: " + e.getMessage());
+		  logger.warning("Warning: " + e.getMessage());
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		} finally {

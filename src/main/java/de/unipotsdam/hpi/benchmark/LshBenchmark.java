@@ -1,5 +1,7 @@
 package de.unipotsdam.hpi.benchmark;
 
+import java.util.logging.Logger;
+
 import de.unipotsdam.hpi.database.Settings;
 import de.unipotsdam.hpi.input.InputVector;
 import de.unipotsdam.hpi.input.IntArrayInputVector;
@@ -14,6 +16,8 @@ import de.unipotsdam.hpi.util.Profiler;
  */
 public class LshBenchmark {
 
+  private static final Logger logger = Logger.getLogger(LshBenchmark.class.getName());
+  
 	private static final String PROF_KEY_LSH_CALCULATION = "LSH calculation";
 	private Settings settings;
 	private BenchmarkSettings benchmarkSettings;
@@ -24,7 +28,7 @@ public class LshBenchmark {
 	}
 
 	public void run() {
-		System.out.println("Generate LSH function...");
+	  logger.info("Generate LSH function...");
 		LshFunction lshFunction = LshFunction.createRandomLSH(settings.getLshSize(), settings.getInputVectorSize());
 
 		System.out
@@ -33,7 +37,7 @@ public class LshBenchmark {
 
 		long avgLshTime = Profiler.getTime(PROF_KEY_LSH_CALCULATION)
 				/ benchmarkSettings.getNumInputVectors();
-		System.out.println("Average LSH calculation time: "
+		logger.info("Average LSH calculation time: "
 				+ Profiler.formatTime(avgLshTime));
 		Profiler.printMeasurements();
 	}
@@ -48,7 +52,7 @@ public class LshBenchmark {
 			lshFunction.createSignature(vector);
 			Profiler.stop(PROF_KEY_LSH_CALCULATION);
 			if ((i + 1) % debugModulo == 0)
-				System.out.println("  " + ((i + 1) * 10 / debugModulo) + "%");
+			  logger.info("  " + ((i + 1) * 10 / debugModulo) + "%");
 		}
 	}
 

@@ -5,6 +5,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import de.unipotsdam.hpi.indexing.BlockBasedIndex;
 import de.unipotsdam.hpi.indexing.Index;
@@ -15,6 +16,8 @@ import de.unipotsdam.hpi.util.Profiler;
 
 public class IndexCreationBenchmark {
 
+  private static final Logger logger = Logger.getLogger(IndexCreationBenchmark.class.getName());
+  
 	private IndexBenchmarkSettings settings;
 
 	public IndexCreationBenchmark(IndexBenchmarkSettings settings) {
@@ -30,7 +33,7 @@ public class IndexCreationBenchmark {
 	}
 
 	private void createIndex(IndexPair[] indexPairs) throws IOException {
-		System.out.println("Creating index");
+		logger.info("Creating index");
 		
 		Path basePath = FileSystems.getDefault().getPath(settings.getIndexPath());
 		int keySize = settings.getBitSignatureLength() >> BitSignatureUtil.LOG_BASE_TYPE_SIZE;;
@@ -46,7 +49,7 @@ public class IndexCreationBenchmark {
 	}
 
 	private void sortIndexPairs(IndexPair[] indexPairs) {
-		System.out.println("Sorting index pairs");
+	  logger.info("Sorting index pairs");
 		
 		Profiler.start("Sort signatures");
 		Arrays.sort(indexPairs, IndexPair.COMPARATOR);
@@ -54,7 +57,7 @@ public class IndexCreationBenchmark {
 	}
 	
 	private IndexPair[] generateBitSignatures() {
-		System.out.println("Generating bit signatures");
+	  logger.info("Generating bit signatures");
 		
 		int numBitSignatures = settings.getNumBitSignatures();
 		int numSignatureParts = settings.getBitSignatureLength() >> BitSignatureUtil.LOG_BASE_TYPE_SIZE;

@@ -3,6 +3,7 @@ package de.unipotsdam.hpi.sorting;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,6 +12,8 @@ import de.unipotsdam.hpi.util.Profiler;
 
 public class ParallelQuickSortTest {
 
+  private static final Logger logger = Logger.getLogger(ParallelQuickSortTest.class.getName());
+  
 	private static final Comparator<Integer> INTEGER_COMPARATOR = new Comparator<Integer>() {
 
 		public int compare(Integer i1, Integer i2) {
@@ -57,20 +60,20 @@ public class ParallelQuickSortTest {
 		ParallelQuickSort<Integer> parallelQuickSort = new ParallelQuickSort<Integer>(
 				100000);
 		Profiler.clear();
-		System.out.println("Sorting parallely");
+		logger.info("Sorting parallely");
 		Integer[] listToSort = originalList.clone();
 		parallelQuickSort.setComparator(INTEGER_COMPARATOR);
 		Profiler.start("parallel");
 		parallelQuickSort.sort(listToSort);
 		Profiler.stop("parallel");
 
-		System.out.println("Sorting sequentially");
+		logger.info("Sorting sequentially");
 		Profiler.start("sequential");
 		Arrays.sort(originalList, INTEGER_COMPARATOR);
 		Profiler.stop("sequential");
 		
 		Assert.assertArrayEquals(originalList, listToSort);
-		System.out.println("Sorted "+originalList.length+" elements");
+		logger.info("Sorted "+originalList.length+" elements");
 		Profiler.printMeasurements();
 	}
 

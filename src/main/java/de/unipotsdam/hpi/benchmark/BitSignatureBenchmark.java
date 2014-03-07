@@ -3,12 +3,15 @@ package de.unipotsdam.hpi.benchmark;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import de.unipotsdam.hpi.util.BitSignatureUtil;
 import de.unipotsdam.hpi.util.Profiler;
 
 public class BitSignatureBenchmark {
 
+  private static final Logger logger = Logger.getLogger(BitSignatureBenchmark.class.getName());
+  
 	private IndexBenchmarkSettings settings;
 
 	public BitSignatureBenchmark(IndexBenchmarkSettings settings) {
@@ -23,7 +26,7 @@ public class BitSignatureBenchmark {
 	}
 
 	private List<long[]> generateBitSignatures() {
-		System.out.println("Generating random bit signatures");
+	  logger.info("Generating random bit signatures");
 		Profiler.start("Generating random bit signatures.");
 
 		int numBitSignatures = settings.getNumBitSignatures();
@@ -57,7 +60,7 @@ public class BitSignatureBenchmark {
 		Profiler.stop("Comparing bit signatures.");
 		int numComparisons = numSignatures
 				* (numSignatures + 1) / 2;
-		System.out.format("Made %d comparisons\n", numComparisons);
+		logger.info(String.format("Made %d comparisons\n", numComparisons));
 	}
 	
 	private void calculateCosineSimilarities(List<long[]> bitSignatures) {
@@ -73,12 +76,12 @@ public class BitSignatureBenchmark {
 		Profiler.stop("Calculating cosine similarities.");
 		int numComparisons = numSignatures
 				* (numSignatures + 1) / 2;
-		System.out.format("Made %d calculations\n", numComparisons);
+		logger.info(String.format("Made %d calculations\n", numComparisons));
 	}
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
-			System.out.println("Some stuff about usage and parameters");
+		  logger.info("Some stuff about usage and parameters");
 			return;
 		}
 

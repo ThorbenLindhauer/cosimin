@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -15,6 +16,8 @@ import de.unipotsdam.hpi.util.TestSettings;
 
 public class MappedIoBlockTest {
 
+  private static final Logger logger = Logger.getLogger(MappedIoBlockTest.class.getName());
+  
 	private static final String TMP_FOLDER = MappedIoBlockTest.class.getName();
 
 	private static Path tempFolder;
@@ -27,7 +30,7 @@ public class MappedIoBlockTest {
 		FileUtils.createDirectoryIfNotExists(globalTempFolder);
 		FileUtils.createDirectoryIfNotExists(tempFolder);
 
-		System.out.println("Using temporary folder " + tempFolder);
+		logger.info("Using temporary folder " + tempFolder);
 	}
 
 	@Test

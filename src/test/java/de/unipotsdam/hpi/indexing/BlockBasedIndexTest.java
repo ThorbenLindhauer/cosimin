@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -17,6 +18,8 @@ import de.unipotsdam.hpi.util.TestSettings;
 
 public class BlockBasedIndexTest {
 
+  private static final Logger logger = Logger.getLogger(BlockBasedIndexTest.class.getName());
+  
 	private static final String TMP_FOLDER = BlockBasedIndexTest.class
 			.getName();
 	private static Path tempFolder;
@@ -29,7 +32,7 @@ public class BlockBasedIndexTest {
 		FileUtils.createDirectoryIfNotExists(globalTempFolder);
 		FileUtils.createDirectoryIfNotExists(tempFolder);
 
-		System.out.println("Using temporary folder " + tempFolder);
+		logger.info("Using temporary folder " + tempFolder);
 	}
 
 	@Test
