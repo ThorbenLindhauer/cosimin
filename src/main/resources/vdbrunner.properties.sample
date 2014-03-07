@@ -1,0 +1,16 @@
+input.vectors.file = ../input/vector-storage.basti
+
+vdb.lsh.size = 1024
+vdb.block.size = 500
+vdb.permutations.count = 1
+vdb.beam.size = 50
+vdb.min.similarity = 0.8
+vdb.save.signatures = false
+vdb.parallel.lsh = false
+vdb.parallel.sorting = false
+
+base.path = .database
+
+# TODO: either rename these properties or just set it to a fixed value
+benchmark.streaming.chunksize = 500
+benchmark.query.count = 1000
