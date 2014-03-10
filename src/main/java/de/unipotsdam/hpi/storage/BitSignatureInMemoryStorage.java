@@ -43,4 +43,12 @@ public class BitSignatureInMemoryStorage implements BitSignatureStorage {
 	public void closeOutput() {
 	}
 
+  public BitSignatureIndex generateIndex() {
+    BitSignatureIndex index = new BitSignatureIndex();
+    for (IndexPair pair : signatures) {
+      index.add(pair);
+    }
+    return index;
+  }
+
 }

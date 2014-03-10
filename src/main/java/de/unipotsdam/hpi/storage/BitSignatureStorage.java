@@ -38,4 +38,6 @@ public interface BitSignatureStorage extends Iterable<IndexPair> {
 	public void flushOutput();
 
 	public void closeOutput();
+	
+	public BitSignatureIndex generateIndex();
 }

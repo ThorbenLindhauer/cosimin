@@ -153,5 +153,17 @@ public class BitSignatureDiskStorage implements BitSignatureStorage {
 			throw new UnsupportedOperationException();
 		}
 
-	};
+	}
+
+  public BitSignatureIndex generateIndex() {
+    BitSignatureIndex index = new BitSignatureIndex();
+    Iterator<IndexPair> it = iterator();
+    
+    while (it.hasNext()) {
+      IndexPair nextPair = it.next();
+      index.add(nextPair);
+    }
+    
+    return index;
+  };
 }

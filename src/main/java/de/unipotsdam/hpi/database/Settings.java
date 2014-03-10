@@ -40,7 +40,7 @@ public class Settings extends AbstractSettings {
   public String basePath = ".vdb";
 
   @Property("store_signatures")
-  public boolean saveBitSignatures;
+  public boolean saveBitSignatures = true;
 
   @Property("lsh.parallel")
   public boolean performParallelLsh = true;

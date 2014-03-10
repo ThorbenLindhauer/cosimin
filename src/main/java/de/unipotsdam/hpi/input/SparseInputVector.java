@@ -53,5 +53,9 @@ public class SparseInputVector implements InputVector {
 		return new SparseInputVector(id, DefaultSparseIntList.fromBytes(bytes));
 	}
 	
+	public byte[] valuesToBytes() {
+	  return sparseIntList.toBytes();
+	}
+	
 
 }

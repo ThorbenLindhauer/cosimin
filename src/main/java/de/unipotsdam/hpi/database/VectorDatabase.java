@@ -45,6 +45,7 @@ import de.unipotsdam.hpi.sorting.SortAlgorithm;
 import de.unipotsdam.hpi.sorting.StandardLibSort;
 import de.unipotsdam.hpi.storage.BitSignatureDiskStorage;
 import de.unipotsdam.hpi.storage.BitSignatureInMemoryStorage;
+import de.unipotsdam.hpi.storage.BitSignatureIndex;
 import de.unipotsdam.hpi.storage.BitSignatureStorage;
 import de.unipotsdam.hpi.util.BitSignatureUtil;
 import de.unipotsdam.hpi.util.FileUtils;
@@ -86,6 +87,7 @@ public class VectorDatabase {
 
 	private LshFunction lshFunction;
 	private BitSignatureStorage signatureStorage;
+	private BitSignatureIndex signatureIndex;
 	private PermutationFunction[] permutationFunctions;
 	private Index[] indexes;
 	private Path storagePath;
@@ -145,9 +147,7 @@ public class VectorDatabase {
 			Profiler.stop(PK_LSH_GENERATION);
 
 			// Signature store
-			signatureStorage = saveBitSignatures ? new BitSignatureDiskStorage(
-			    storagePath, bitSignatureSize, false)
-					: new BitSignatureInMemoryStorage();
+			initializeBitSignatureStorage();
 
 			// Permutation functions
 			permutationFunctions = new PermutationFunction[numPermutations];
@@ -163,6 +163,14 @@ public class VectorDatabase {
 		} catch (IOException e) {
 			throw new RuntimeException("Could not initialize!", e);
 		}
+	}
+	
+	private void initializeBitSignatureStorage() {
+	  Path basePath = FileUtils.toPath(this.basePath);
+	  storagePath = basePath.resolve(SIGNATURE_STORAGE_PATH);
+	  signatureStorage = saveBitSignatures ? new BitSignatureDiskStorage(
+        storagePath, bitSignatureSize, false)
+        : new BitSignatureInMemoryStorage();
 	}
 
 	/**
@@ -365,7 +373,7 @@ public class VectorDatabase {
 		recoverIndex();
 	}
 
-	private void recoverIndex() throws IOException {
+  private void recoverIndex() throws IOException {
 		indexes = (Index[]) FileUtils.load(FileUtils.toPath(basePath,
 				INDEXES_FILE));
 		for (Index index : indexes) {
@@ -387,8 +395,10 @@ public class VectorDatabase {
 
 		recoverPath = FileUtils.toPath(basePath, LSH_FUNCTION_FILE).toString();
 		lshFunction = (LshFunction) FileUtils.load(recoverPath);
-
+		
 		logger.info("LshFunction: " + lshFunction.toString());
+		
+		initializeBitSignatureStorage();
 	}
 
 	public void deleteFiles() {
@@ -398,39 +408,69 @@ public class VectorDatabase {
 
 	public Int2DoubleMap getNearNeighborsWithDistance(InputVector queryVector,
 			int beamRadius, double minSimilarity) {
-	  logger.info("Query with beam " + beamRadius	+ " and min similarity " + minSimilarity);
-		Profiler.start("Find nearest neighbors");
 
 		// create the signature of the input vector
 		long[] querySignature = lshFunction.createSignature(queryVector);
 
-		// create all permutations of this signature...
-		Int2DoubleMap distances = new Int2DoubleOpenHashMap();
-		IntSet seenElements = new IntOpenHashSet();
-		for (int i = 0; i < numPermutations; i++) {
-			PermutationFunction permutationFunction = permutationFunctions[i];
-			Index index = indexes[i];
-			long[] permutedSignature = permutationFunction
-					.permute(querySignature);
-
-			// ...and get the nearest neighbors from the corresponding index
-			IndexPair[] neighbors = index.getNearestNeighbours(
-					permutedSignature, beamRadius);
-
-			// store the neighbors that are close enough
-			for (IndexPair neighbor : neighbors) {
-				if (seenElements.add(neighbor.getElementId())) {
-					double similarity = BitSignatureUtil
-							.calculateBitVectorCosine(permutedSignature,
-									neighbor.getBitSignature());
-					if (similarity >= minSimilarity)
-						distances.put(neighbor.getElementId(), similarity);
-				}
-			}
-		}
-
-		Profiler.stop("Find nearest neighbors");
-		return distances;
+		return getNearNeighborsWithDistance(querySignature, beamRadius, minSimilarity);
 	}
+	
+	/**
+	 * Gets the elements most similar to the original element. When first called, this method builds an index
+	 * over the bit signatures, meaning that all bit signatures are loaded to main memory. This may be not desirable
+	 * due to the memory footprint.
+	 * @param elementId
+	 * @param beamRadius
+	 * @param minSimilarity
+	 * @return
+	 */
+	public Int2DoubleMap getNearNeighborsWithDistance(int elementId, 
+	    int beamRadius, double minSimilarity) {
+	  ensureBitSignaturesIndexed();
+	  
+	  long[] signature = signatureIndex.getIndexPair(elementId).getBitSignature();
+	  
+	  return getNearNeighborsWithDistance(signature, beamRadius, minSimilarity);
+	}
+	
+	private synchronized void ensureBitSignaturesIndexed() {
+	  if (signatureIndex == null) {
+	    signatureIndex = signatureStorage.generateIndex();
+	  }
+	}
+	
+	private Int2DoubleMap getNearNeighborsWithDistance(long[] signature,
+      int beamRadius, double minSimilarity) {
+    logger.info("Query with beam " + beamRadius + " and min similarity " + minSimilarity);
+    Profiler.start("Find nearest neighbors");
 
+    // create all permutations of this signature...
+    Int2DoubleMap distances = new Int2DoubleOpenHashMap();
+    IntSet seenElements = new IntOpenHashSet();
+    for (int i = 0; i < numPermutations; i++) {
+      PermutationFunction permutationFunction = permutationFunctions[i];
+      Index index = indexes[i];
+      long[] permutedSignature = permutationFunction
+          .permute(signature);
+
+      // ...and get the nearest neighbors from the corresponding index
+      IndexPair[] neighbors = index.getNearestNeighbours(
+          permutedSignature, beamRadius);
+
+      // store the neighbors that are close enough
+      for (IndexPair neighbor : neighbors) {
+        if (seenElements.add(neighbor.getElementId())) {
+          double similarity = BitSignatureUtil
+              .calculateBitVectorCosine(permutedSignature,
+                  neighbor.getBitSignature());
+          if (similarity >= minSimilarity)
+            distances.put(neighbor.getElementId(), similarity);
+        }
+      }
+    }
+
+    Profiler.stop("Find nearest neighbors");
+    return distances;
+  }
+	
 }

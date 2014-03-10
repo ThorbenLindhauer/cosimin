@@ -156,4 +156,40 @@ public class DefaultSparseIntList extends AbstractSparseIntList {
 		// TODO at this point, we could do sanitiy checks
 		this.size = size;
 	}
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((positions == null) ? 0 : positions.hashCode());
+    result = prime * result + size;
+    result = prime * result + ((values == null) ? 0 : values.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    DefaultSparseIntList other = (DefaultSparseIntList) obj;
+    if (positions == null) {
+      if (other.positions != null)
+        return false;
+    } else if (!positions.equals(other.positions))
+      return false;
+    if (size != other.size)
+      return false;
+    if (values == null) {
+      if (other.values != null)
+        return false;
+    } else if (!values.equals(other.values))
+      return false;
+    return true;
+  }
+
+	
 }
