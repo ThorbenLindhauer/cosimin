@@ -426,11 +426,15 @@ public class VectorDatabase {
 	 */
 	public Int2DoubleMap getNearNeighborsWithDistance(int elementId, 
 	    int beamRadius, double minSimilarity) {
-	  ensureBitSignaturesIndexed();
-	  
-	  long[] signature = signatureIndex.getIndexPair(elementId).getBitSignature();
+	  long[] signature = getBitSignature(elementId);
 	  
 	  return getNearNeighborsWithDistance(signature, beamRadius, minSimilarity);
+	}
+	
+	public long[] getBitSignature(int elementId) {
+	  ensureBitSignaturesIndexed();
+	  
+	  return signatureIndex.getIndexPair(elementId).getBitSignature();
 	}
 	
 	private synchronized void ensureBitSignaturesIndexed() {
