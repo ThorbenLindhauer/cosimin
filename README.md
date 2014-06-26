@@ -5,7 +5,7 @@ Cosimin creates indexing structures that allow to efficiently search by similari
 
 Cosimin implements a locality-sensitive hashing technique proposed in the following publication ([online](http://www.isi.edu/natural-language/people/hovy/papers/05ACL-clustering.pdf)):
 
-> Ravichandran, Deepak, Patrick Pantel, and Eduard Hovy. "Randomized Algorithms and NLP: Using Locality Sensitive Hash Function for High Speed Noun Clustering." Proceedings of the 43rd Annual Meeting on Association for Computational Linguistics. Association for Computational Linguistics, 2005.
+> Deepak Ravichandran, Patrick Pantel, and Eduard Hovy. "Randomized Algorithms and NLP: Using Locality Sensitive Hash Functions for High Speed Noun Clustering." Proceedings of the 43rd Annual Meeting on Association for Computational Linguistics. Association for Computational Linguistics, 2005.
 
 The best (documentation) is yet to come.
 
