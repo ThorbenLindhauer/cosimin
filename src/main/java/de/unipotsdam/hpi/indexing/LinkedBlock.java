@@ -34,6 +34,11 @@ public interface LinkedBlock extends Serializable {
 	 * from <code>startIndex</code>. The pairs are assumed to be sorted.
 	 */
 	void bulkLoad(IndexPair[] pairs, int startIndex, int length);
+	
+	/**
+	 * Loads all the given pairs into the block.
+	 */
+	void bulkLoad(IndexPair[] pairs);
 
 	/**
 	 * Inserts a single element into the block if there is capacity left.

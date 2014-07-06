@@ -84,15 +84,6 @@ public class MappedIoBlock extends AbstractLinkedBlock {
 	}
 
 	/**
-	 * Inserts all pairs into the block.
-	 * 
-	 * @see #bulkLoad(IndexPair[], int, int)
-	 */
-	public void bulkLoad(IndexPair[] pairs) {
-		bulkLoad(pairs, 0, pairs.length);
-	}
-
-	/**
 	 * Inserts a subset of pairs of the given array. The pairs must fit into
 	 * this block. If there are less pairs than the block's capacity, the rest
 	 * remains unchanged. The pairs are assumed to be already sorted.

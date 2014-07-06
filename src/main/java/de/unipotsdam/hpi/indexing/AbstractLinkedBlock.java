@@ -55,5 +55,14 @@ abstract public class AbstractLinkedBlock implements LinkedBlock, Serializable {
 	public long[] getStartKey() {
 		return startKey;
 	}
+	
+	/**
+   * Inserts all pairs into the block.
+   * 
+   * @see #bulkLoad(IndexPair[], int, int)
+   */
+  public void bulkLoad(IndexPair[] pairs) {
+    bulkLoad(pairs, 0, pairs.length);
+  }
 
 }

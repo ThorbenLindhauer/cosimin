@@ -29,13 +29,11 @@ import org.junit.Test;
 import de.unipotsdam.hpi.util.FileUtils;
 import de.unipotsdam.hpi.util.TestSettings;
 
-public class CachingBlockTest {
+public class CachingBlockTest extends AbstractIndexBlockTest {
 
   private static final Logger logger = Logger.getLogger(CachingBlockTest.class.getName());
   
 	private static final String TMP_FOLDER = CachingBlockTest.class.getName();
-
-	private static Path tempFolder;
 
 	@BeforeClass
 	public static void createTempDirectory() throws IOException {
@@ -48,48 +46,6 @@ public class CachingBlockTest {
 		logger.info("Using temporary folder " + tempFolder);
 	}
 
-	@Test
-	public void testBlockCreation() {
-		int numElements = 10;
-		int keySize = 4;
-		Path filePath = tempFolder.resolve("BlockTest.testBlockWriting");
-		try {
-			AbstractLinkedBlock block = new CachingBlock(numElements, keySize, filePath);
-			Assert.assertEquals(numElements, block.getCapacity());
-			// happy path
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.getMessage());
-		}
-	}
-
-	@Test
-	public void testBlockBulkLoading() throws IOException {
-		int numElements = 10;
-		int keySize = 4;
-		Path filePath = tempFolder.resolve("BlockTest.testBlockBulkLoading");
-		CachingBlock block = new CachingBlock(numElements, keySize, filePath);
-
-		IndexPair[] indexPairs = new IndexPair[numElements];
-		for (int i = 0; i < numElements; i++) {
-			long[] key = new long[] { i, i, i, i };
-			int elementId = (int) i;
-			IndexPair pair = new IndexPair(key, elementId);
-			indexPairs[i] = pair;
-		}
-
-		block.bulkLoad(indexPairs);
-
-		IndexPair[] retrievedIndexPairs = block.getElements(0, 10);
-		for (int i = 0; i < numElements; i++) {
-			IndexPair pair = retrievedIndexPairs[i];
-			Assert.assertTrue(Arrays.equals(indexPairs[i].getBitSignature(),
-					pair.getBitSignature()));
-			Assert.assertEquals(indexPairs[i].getElementId(),
-					pair.getElementId());
-		}
-	}
-	
 	@Test
 	public void testBlockBulkLoadingWithoutCache() throws IOException {
 		int numElements = 10;
@@ -119,48 +75,6 @@ public class CachingBlockTest {
 	}
 
 	@Test
-	public void testOverlongBulkLoading() throws IOException {
-		int numElements = 10;
-		int keySize = 4;
-		Path filePath = tempFolder.resolve("BlockTest.testOverlongBulkLoading");
-		CachingBlock block = new CachingBlock(numElements, keySize, filePath);
-		IndexPair[] indexPairs = new IndexPair[numElements + 1];
-		for (int i = 0; i < numElements; i++) {
-			indexPairs[i] = new IndexPair();
-		}
-
-		try {
-			block.bulkLoad(indexPairs);
-			Assert.fail("Exception expected");
-		} catch (RuntimeException e) {
-			// happy path
-		}
-	}
-
-	@Test
-	public void testGetElement() throws IOException {
-		int numElements = 10;
-		int keySize = 4;
-		Path filePath = tempFolder.resolve("BlockTest.testGetElement");
-		CachingBlock block = new CachingBlock(numElements, keySize, filePath);
-
-		IndexPair[] indexPairs = new IndexPair[numElements];
-		for (int i = 0; i < numElements; i++) {
-			long[] key = new long[] { i, i, i, i };
-			int elementId = (int) i;
-			IndexPair pair = new IndexPair(key, elementId);
-			indexPairs[i] = pair;
-		}
-
-		block.bulkLoad(indexPairs);
-
-		for (IndexPair pair : indexPairs) {
-			int retrievedId = block.get(pair.getBitSignature());
-			Assert.assertEquals(pair.getElementId(), retrievedId);
-		}
-	}
-	
-	@Test
 	public void testGetElementWithoutCache() throws IOException {
 		int numElements = 10;
 		int keySize = 4;
@@ -184,32 +98,6 @@ public class CachingBlockTest {
 		}
 	}
 
-	@Test
-	public void testGetNonExistingElement() throws IOException {
-		int numElements = 10;
-		int keySize = 4;
-		Path filePath = tempFolder
-				.resolve("BlockTest.testGetNonExistingElement");
-		CachingBlock block = new CachingBlock(numElements, keySize, filePath);
-
-		IndexPair[] indexPairs = new IndexPair[numElements];
-		for (int i = 0; i < numElements; i++) {
-			long[] key = new long[] { i, i, i, i };
-			int elementId = (int) i;
-			IndexPair pair = new IndexPair(key, elementId);
-			indexPairs[i] = pair;
-		}
-
-		block.bulkLoad(indexPairs);
-
-		try {
-			block.get(new long[] { 3, 2, 1, 0 });
-			Assert.fail("Expected exception.");
-		} catch (IllegalArgumentException e) {
-			// happy path
-		}
-	}
-	
 	@Test
 	public void testGetNonExistingElementWithoutCache() throws IOException {
 		int numElements = 10;
@@ -237,32 +125,6 @@ public class CachingBlockTest {
 		}
 	}
 
-	@Test
-	public void testInsertElement() throws IOException {
-		int numElements = 10;
-		int keySize = 4;
-		Path filePath = tempFolder.resolve("BlockTest.testInsertElement");
-		CachingBlock block = new CachingBlock(numElements + 1, keySize, filePath);
-
-		IndexPair[] indexPairs = new IndexPair[numElements];
-		for (int i = 0; i < numElements; i++) {
-			long[] key = new long[] { i, i, i, i };
-			int elementId = (int) i;
-			IndexPair pair = new IndexPair(key, elementId);
-			indexPairs[i] = pair;
-		}
-
-		block.bulkLoad(indexPairs);
-		IndexPair newPair = new IndexPair(new long[] { 2, 1, 0, 1 }, 2101);
-		block.insertElement(newPair);
-		for (int i = 0; i < numElements; i++) {
-			Assert.assertEquals(indexPairs[i].getElementId(),
-					block.get(indexPairs[i].getBitSignature()));
-		}
-		Assert.assertEquals(newPair.getElementId(),
-				block.get(newPair.getBitSignature()));
-	}
-	
 	@Test
 	public void testInsertElementWithoutCache() throws IOException {
 		int numElements = 10;
@@ -294,31 +156,6 @@ public class CachingBlockTest {
 	}
 	
 	@Test
-	public void testInsertElementIntoFullBlock() throws IOException {
-		int numElements = 10;
-		int keySize = 4;
-		Path filePath = tempFolder.resolve("BlockTest.testInsertElementIntoFullBlock");
-		CachingBlock block = new CachingBlock(numElements, keySize, filePath);
-		
-		IndexPair[] indexPairs = new IndexPair[numElements];
-		for (int i = 0; i < numElements; i++) {
-			long[] key = new long[] { i, i, i, i };
-			int elementId = (int) i;
-			IndexPair pair = new IndexPair(key, elementId);
-			indexPairs[i] = pair;
-		}
-		block.bulkLoad(indexPairs);
-
-		IndexPair newPair = new IndexPair(new long[] { 2, 1, 0, 1 }, 2101);
-		try {
-			block.insertElement(newPair);
-			Assert.fail("Exception expected.");
-		} catch (IllegalStateException e) {
-			// happy path
-		}
-	}
-	
-	@Test
 	public void testInsertElementIntoFullBlockWithoutCache() throws IOException {
 		int numElements = 10;
 		int keySize = 4;
@@ -344,40 +181,6 @@ public class CachingBlockTest {
 		}
 	}
 
-	@Test
-	public void testDeleteElement() throws IOException {
-		int numElements = 10;
-		int keySize = 4;
-		Path filePath = tempFolder.resolve("BlockTest.testDeleteElement");
-		CachingBlock block = new CachingBlock(numElements, keySize, filePath);
-
-		IndexPair[] indexPairs = new IndexPair[numElements];
-		for (int i = 0; i < numElements; i++) {
-			long[] key = new long[] { i, i, i, i };
-			int elementId = (int) i;
-			IndexPair pair = new IndexPair(key, elementId);
-			indexPairs[i] = pair;
-		}
-
-		block.bulkLoad(indexPairs);
-		int indexToRemove = 4;
-		IndexPair pairToRemove = indexPairs[indexToRemove];
-		block.deleteElement(pairToRemove.getBitSignature());
-		for (int i = 0; i < numElements; i++) {
-			if (i == indexToRemove)
-				continue;
-			Assert.assertEquals(indexPairs[i].getElementId(),
-					block.get(indexPairs[i].getBitSignature()));
-		}
-
-		try {
-			block.get(pairToRemove.getBitSignature());
-			Assert.fail("Element should not be included any more.");
-		} catch (IllegalArgumentException e) {
-			// happy path
-		}
-	}
-	
 	@Test
 	public void testDeleteElementWithoutCache() throws IOException {
 		int numElements = 10;
@@ -421,6 +224,12 @@ public class CachingBlockTest {
 	@AfterClass
   public static void cleanUp() {
     FileUtils.clearAndDeleteDirecotry(tempFolder);
+  }
+
+  @Override
+  protected LinkedBlock newBlock(int capacity, int keySize, Path filePath)
+      throws IOException {
+    return new CachingBlock(capacity, keySize, filePath);
   }
 	
 	
