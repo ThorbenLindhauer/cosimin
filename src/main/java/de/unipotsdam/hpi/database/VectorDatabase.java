@@ -380,12 +380,19 @@ public class VectorDatabase {
     ensureBitSignaturesIndexed();
     
   }
-
+  
   private void recoverIndex() throws IOException {
 		indexes = (Index[]) FileUtils.load(FileUtils.toPath(basePath,
 				INDEXES_FILE));
-		for (Index index : indexes) {
-			index.recover();
+		
+		for (int i = 0; i < indexes.length; i++) {
+		  Index index = indexes[i];
+		  index.recover();
+      if (index instanceof ReferenceBlockBasedIndex) {
+        ReferenceBlockBasedIndex referenceBasedIndex = (ReferenceBlockBasedIndex) index;
+        referenceBasedIndex.setBitSignatureIndex(signatureIndex);
+        referenceBasedIndex.setPermutationFunction(permutationFunctions[i]);
+      }
 		}
 	}
 

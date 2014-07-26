@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import de.unipotsdam.hpi.permutation.PermutationFunction;
+import de.unipotsdam.hpi.storage.AggregatedReferenceBlockStorage;
 import de.unipotsdam.hpi.storage.BitSignatureIndex;
 import de.unipotsdam.hpi.util.BitSignatureUtil;
 
@@ -19,6 +20,11 @@ public class ReferenceBlockBasedIndex extends AbstractBlockBasedIndex<ReferenceB
   transient protected BitSignatureIndex bitSignatureIndex;
   transient protected PermutationFunction permutationFunction;
   
+  private int storageCounter = 0;
+  private int blocksPerFile = 100;
+  
+  transient AggregatedReferenceBlockStorage currentStorage;
+  
   public ReferenceBlockBasedIndex(Path basePath, int keySize, int blockSize, BitSignatureIndex bitSignatureIndex, 
       PermutationFunction permutationFunction) {
     super(basePath, keySize, blockSize);
@@ -27,9 +33,20 @@ public class ReferenceBlockBasedIndex extends AbstractBlockBasedIndex<ReferenceB
   }
 
   protected ReferenceBlock createNewBlock() throws IOException {
-    Path blockPath = basePath.resolve("blockIndex" + blockIdCounter++);
-    ReferenceBlock block = new ReferenceBlock(blockSize, keySize, blockPath);
+    AggregatedReferenceBlockStorage storage = resolveBlockStorage();
+    ReferenceBlock block = new ReferenceBlock(blockSize, keySize, storage, blockIdCounter++);
     return block;
+  }
+  
+  protected AggregatedReferenceBlockStorage resolveBlockStorage() {
+    if (currentStorage == null || storageCounter % blocksPerFile == 0) {
+      int storageId = storageCounter / blocksPerFile;
+      Path storagePath = basePath.resolve("blockIndex" + storageId);
+      currentStorage = new AggregatedReferenceBlockStorage(storagePath);
+    }
+    storageCounter++;
+    
+    return currentStorage;
   }
   
   /**
@@ -221,10 +238,11 @@ public class ReferenceBlockBasedIndex extends AbstractBlockBasedIndex<ReferenceB
     throw new UnsupportedOperationException("not implemented");
   }
 
-  
-  // bulk load:
+  public void setBitSignatureIndex(BitSignatureIndex bitSignatureIndex) {
+    this.bitSignatureIndex = bitSignatureIndex;
+  }
 
-//  if (!bitSignatureIndex.contains(pair.getElementId())) {
-//    bitSignatureIndex.add(pair);
-//  }
+  public void setPermutationFunction(PermutationFunction permutationFunction) {
+    this.permutationFunction = permutationFunction;
+  }
 }

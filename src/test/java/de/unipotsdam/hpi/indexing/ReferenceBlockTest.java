@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import de.unipotsdam.hpi.storage.AggregatedReferenceBlockStorage;
 import de.unipotsdam.hpi.storage.BitSignatureIndex;
 import de.unipotsdam.hpi.util.FileUtils;
 import de.unipotsdam.hpi.util.TestSettings;
@@ -19,6 +20,8 @@ public class ReferenceBlockTest extends AbstractIndexBlockTest<ReferenceBlock> {
   private static final String TMP_FOLDER = ReferenceBlockTest.class.getName();
   
   private BitSignatureIndex bitSignatureIndex;
+  
+  private int blockIdCounter;
   
   @BeforeClass
   public static void createTempDirectory() throws IOException {
@@ -34,12 +37,13 @@ public class ReferenceBlockTest extends AbstractIndexBlockTest<ReferenceBlock> {
   @Before
   public void setUpBitsignatureIndex() {
     bitSignatureIndex = new BitSignatureIndex();
+    blockIdCounter = 0;
   }
   
   @Override
   protected ReferenceBlock newBlock(int capacity, int keySize, Path filePath)
       throws IOException {
-    return new ReferenceBlock(capacity, keySize, filePath);
+    return new ReferenceBlock(capacity, keySize, new AggregatedReferenceBlockStorage(filePath), blockIdCounter++);
   }
 
   @Override

@@ -3,19 +3,12 @@ package de.unipotsdam.hpi.indexing;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.ref.SoftReference;
-import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import de.unipotsdam.hpi.storage.AggregatedReferenceBlockStorage;
 import de.unipotsdam.hpi.util.BitSignatureUtil;
-import de.unipotsdam.hpi.util.EncodingUtils;
 
 public class ReferenceBlock extends AbstractLinkedBlock<ReferenceBlock> {
 
@@ -26,15 +19,16 @@ public class ReferenceBlock extends AbstractLinkedBlock<ReferenceBlock> {
   private static AtomicInteger hitCount = new AtomicInteger();
   private static AtomicInteger missCount = new AtomicInteger();
   
-  private File file;
+  private int blockId;
   
-  transient private SoftReference<int[]> cache;
+  private AggregatedReferenceBlockStorage storage;
   
   
-  public ReferenceBlock(int capacity, int keySize, Path filePath) {
+  public ReferenceBlock(int capacity, int keySize, AggregatedReferenceBlockStorage storage, int id) {
     this.capacity = capacity;
     this.keySize = keySize;
-    this.file = filePath.toFile();
+    this.blockId = id;
+    this.storage = storage;
   }
   
   public void bulkLoad(int[] elementIds, long[] startKey) {
@@ -49,35 +43,16 @@ public class ReferenceBlock extends AbstractLinkedBlock<ReferenceBlock> {
     if (length == 0) {
       return;
     }
-    OutputStream out = null;
-    try {
-      out = new BufferedOutputStream(new FileOutputStream(file));
-      for (int i = offset; i < offset + length; i++) {
-        int elementId = elementIds[i];
-        EncodingUtils.writeInt(elementId, out);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } finally {
-      try {
-        if (out != null)
-          out.close();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-
-    }
+    
+    int[] localElementIds = new int[length];
+    System.arraycopy(elementIds, offset, localElementIds, 0, length);
+    storage.writeBlock(blockId, localElementIds);
 
     if (startKey != null) {
       this.startKey = startKey;
     }
     
     size = length;
-    
-    int[] cachedElementIds = new int[length];
-    System.arraycopy(elementIds, offset, cachedElementIds, 0, length);
-
-    cache = new SoftReference<int[]>(cachedElementIds);
   }
 
   public void insertElement(int elementId, long[] key, int index) {
@@ -139,40 +114,7 @@ public class ReferenceBlock extends AbstractLinkedBlock<ReferenceBlock> {
   }
   
   private synchronized int[] getOrLoadElementIds() {
-    int[] elementIds;
-    if (cache != null && (elementIds = cache.get()) != null) {
-      hitCount.incrementAndGet();
-      return elementIds;
-    }
-
-    missCount.incrementAndGet();
-    elementIds = new int[size];
-    FileInputStream in = null;
-    try {
-      in = new FileInputStream(file);
-      // in.skip(startPos);
-      for (int i = 0; i < size; i++) {
-        int elementId = EncodingUtils.readInt(in);
-        elementIds[i] = elementId;
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } finally {
-      if (in != null)
-        try {
-          in.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-    }
-
-    this.cache = new SoftReference<int[]>(elementIds);
-
-    return elementIds;
-  }
-  
-  public void clearCache() {
-    cache = null;
+    return storage.getBlock(blockId);
   }
   
   public static void printStatistics() {
