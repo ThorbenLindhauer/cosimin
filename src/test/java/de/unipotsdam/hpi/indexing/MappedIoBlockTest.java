@@ -26,7 +26,7 @@ import org.junit.BeforeClass;
 import de.unipotsdam.hpi.util.FileUtils;
 import de.unipotsdam.hpi.util.TestSettings;
 
-public class MappedIoBlockTest extends AbstractIndexBlockTest {
+public class MappedIoBlockTest extends AbstractSignatureStoringBlockTest {
 
   private static final Logger logger = Logger.getLogger(MappedIoBlockTest.class.getName());
   
@@ -50,7 +50,7 @@ public class MappedIoBlockTest extends AbstractIndexBlockTest {
     FileUtils.clearAndDeleteDirecotry(tempFolder);
   }
 
-  protected LinkedBlock newBlock(int capacity, int keySize, Path filePath) throws IOException {
+  protected SignatureStoringBlock newBlock(int capacity, int keySize, Path filePath) throws IOException {
     return new MappedIoBlock(capacity, keySize, filePath);
   }
 }

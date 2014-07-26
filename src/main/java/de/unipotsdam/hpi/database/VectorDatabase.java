@@ -32,9 +32,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import de.unipotsdam.hpi.indexing.BlockBasedIndex;
 import de.unipotsdam.hpi.indexing.Index;
 import de.unipotsdam.hpi.indexing.IndexPair;
+import de.unipotsdam.hpi.indexing.ReferenceBlockBasedIndex;
 import de.unipotsdam.hpi.input.InputVector;
 import de.unipotsdam.hpi.lsh.LshFunction;
 import de.unipotsdam.hpi.permutation.ListBasedPermutationFunction;
@@ -345,7 +345,8 @@ public class VectorDatabase {
 	private void buildIndex(Path[] indexPaths, IndexPair[] permutatedElements,
 			int keySize, int i) {
 		Profiler.start(PK_INDEX_CREATION);
-		Index index = new BlockBasedIndex(indexPaths[i], keySize, blockSize);
+		ensureBitSignaturesIndexed();
+		Index index = new ReferenceBlockBasedIndex(indexPaths[i], keySize, blockSize, signatureIndex, permutationFunctions[i]);
 		index.bulkLoad(permutatedElements);
 		indexes[i] = index;
 		Profiler.stop(PK_INDEX_CREATION);
@@ -370,8 +371,15 @@ public class VectorDatabase {
 
 	public void recover() throws IOException {
 		loadRecoverInformation();
+		recoverSignatureIndex();
 		recoverIndex();
 	}
+
+  private void recoverSignatureIndex() {
+    initializeBitSignatureStorage();
+    ensureBitSignaturesIndexed();
+    
+  }
 
   private void recoverIndex() throws IOException {
 		indexes = (Index[]) FileUtils.load(FileUtils.toPath(basePath,
@@ -443,7 +451,14 @@ public class VectorDatabase {
 	  }
 	}
 	
-	private Int2DoubleMap getNearNeighborsWithDistance(long[] signature,
+	private Int2DoubleMap getNearNeighborsWithDistance(long[] signature, int beamRadius, double minSimilarity) {
+	  // implementatins may be switched here for the moment
+	  // to method getNearNeighborsWithDistanceFromIndexPairs which is better suited when using a SignatureStoringBlockBasedIndex
+	  
+	  return getNearNeighborsWithDistanceFromElementIds(signature, beamRadius, minSimilarity);
+	}
+	
+	private Int2DoubleMap getNearNeighborsWithDistanceFromElementIds(long[] signature,
       int beamRadius, double minSimilarity) {
     logger.info("Query with beam " + beamRadius + " and min similarity " + minSimilarity);
     Profiler.start("Find nearest neighbors");
@@ -458,7 +473,43 @@ public class VectorDatabase {
           .permute(signature);
 
       // ...and get the nearest neighbors from the corresponding index
-      IndexPair[] neighbors = index.getNearestNeighbours(
+      int[] neighbors = index.getNearestNeighboursElementIds(
+          permutedSignature, beamRadius);
+
+      // store the neighbors that are close enough
+      for (int neighbor : neighbors) {
+        if (seenElements.add(neighbor)) {
+          IndexPair correspondingPair = signatureIndex.getIndexPair(neighbor);
+          
+          double similarity = BitSignatureUtil
+            .calculateBitVectorCosine(signature, correspondingPair.getBitSignature());
+          if (similarity >= minSimilarity)
+            distances.put(neighbor, similarity);
+        }
+      }
+    }
+
+    Profiler.stop("Find nearest neighbors");
+    return distances;
+  }
+	
+	// unused but may be switched with getNearNeighborsWithDistanceFromElementIds()
+	private Int2DoubleMap getNearNeighborsWithDistanceFromIndexPairs(long[] signature,
+      int beamRadius, double minSimilarity) {
+    logger.info("Query with beam " + beamRadius + " and min similarity " + minSimilarity);
+    Profiler.start("Find nearest neighbors");
+
+    // create all permutations of this signature...
+    Int2DoubleMap distances = new Int2DoubleOpenHashMap();
+    IntSet seenElements = new IntOpenHashSet();
+    for (int i = 0; i < numPermutations; i++) {
+      PermutationFunction permutationFunction = permutationFunctions[i];
+      Index index = indexes[i];
+      long[] permutedSignature = permutationFunction
+          .permute(signature);
+
+      // ...and get the nearest neighbors from the corresponding index
+      IndexPair[] neighbors = index.getNearestNeighboursPairs(
           permutedSignature, beamRadius);
 
       // store the neighbors that are close enough

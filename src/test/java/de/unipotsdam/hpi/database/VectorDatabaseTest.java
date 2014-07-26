@@ -170,7 +170,7 @@ public class VectorDatabaseTest {
 		settings.setNumPermutations(1);
 		settings.setBlockSize(20);
 		settings.setBasePath(ROOT_TEMP_FOLDER_NAME + "/testExactMatchesAlwaysFoundAfterRecovery");
-		settings.setSaveBitSignatures(false);
+		settings.setSaveBitSignatures(true);
 		settings.setPerformParallelLsh(false);
 		settings.setPerformParallelSorting(false);
 		

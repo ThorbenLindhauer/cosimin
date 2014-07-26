@@ -22,9 +22,9 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import de.unipotsdam.hpi.indexing.BlockBasedIndex;
 import de.unipotsdam.hpi.indexing.Index;
 import de.unipotsdam.hpi.indexing.IndexPair;
+import de.unipotsdam.hpi.indexing.SignatureStoringBlockBasedIndex;
 import de.unipotsdam.hpi.util.BitSignatureUtil;
 import de.unipotsdam.hpi.util.FileUtils;
 import de.unipotsdam.hpi.util.Profiler;
@@ -57,7 +57,7 @@ public class IndexCreationBenchmark {
 		FileUtils.clearDirectory(basePath);
 		
 		Profiler.start("Build index");
-		Index index = new BlockBasedIndex(basePath, keySize, blockSize);
+		Index index = new SignatureStoringBlockBasedIndex(basePath, keySize, blockSize);
 		index.bulkLoad(indexPairs);
 		index.close();
 		Profiler.stop("Build index");

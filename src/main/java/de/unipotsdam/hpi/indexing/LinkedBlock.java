@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * A linked block is used by a {@link BlockBasedIndex} to store a set of
+ * A linked block is used by a {@link AbstractBlockBasedIndex} to store a set of
  * {@link IndexPair}s. Blocks are organized in a double-linked list and have a
  * key to support vector queries without having to look into the actually
  * contained elements.
@@ -27,23 +27,7 @@ import java.io.Serializable;
  * @author Sebastian
  * 
  */
-public interface LinkedBlock extends Serializable {
-
-	/**
-	 * Loads <code>length</code> of the given pairs into the block beginning
-	 * from <code>startIndex</code>. The pairs are assumed to be sorted.
-	 */
-	void bulkLoad(IndexPair[] pairs, int startIndex, int length);
-	
-	/**
-	 * Loads all the given pairs into the block.
-	 */
-	void bulkLoad(IndexPair[] pairs);
-
-	/**
-	 * Inserts a single element into the block if there is capacity left.
-	 */
-	void insertElement(IndexPair pair);
+public interface LinkedBlock<T extends LinkedBlock<T>> extends Serializable {
 
 	/**
 	 * Returns the number of elements in this block.
@@ -58,47 +42,27 @@ public interface LinkedBlock extends Serializable {
 	/**
 	 * Links the block.
 	 */
-	void setPreviousBlock(LinkedBlock block);
+	void setPreviousBlock(T block);
 
 	/**
 	 * Links the block.
 	 */
-	void setNextBlock(LinkedBlock newBlock);
+	void setNextBlock(T newBlock);
 
 	/**
 	 * Returns the previous block.
 	 */
-	LinkedBlock getPreviousBlock();
+	T getPreviousBlock();
 
 	/**
 	 * Returns the next block.
 	 */
-	LinkedBlock getNextBlock();
-
-	/**
-	 * Returns the elements of the block.
-	 */
-	IndexPair[] getElements();
-
-	/**
-	 * Returns a subset of the elements of this block-
-	 */
-	IndexPair[] getElements(int startIndex, int numElements);
+	T getNextBlock();
 
 	/**
 	 * Returns the key of the first contained element in this block.
 	 */
 	long[] getStartKey();
-
-	/**
-	 * Tries to retrieve the ID of an element associated with the given key.
-	 */
-	int get(long[] key);
-
-	/**
-	 * Deletes all elements that are associated with the given key.
-	 */
-	void deleteElement(long[] key);
 
 	/**
 	 * Closes connection to any system resources held by this block.

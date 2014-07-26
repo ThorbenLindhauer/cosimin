@@ -37,7 +37,7 @@ import de.unipotsdam.hpi.util.EncodingUtils;
  * @author Thorben
  * 
  */
-public class MappedIoBlock extends AbstractLinkedBlock {
+public class MappedIoBlock extends AbstractSignatureStoringBlock {
 
 	private static final long serialVersionUID = 8704103734709675740L;
 

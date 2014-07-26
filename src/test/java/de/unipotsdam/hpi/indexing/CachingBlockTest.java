@@ -29,12 +29,18 @@ import org.junit.Test;
 import de.unipotsdam.hpi.util.FileUtils;
 import de.unipotsdam.hpi.util.TestSettings;
 
-public class CachingBlockTest extends AbstractIndexBlockTest {
+public class CachingBlockTest extends AbstractSignatureStoringBlockTest {
 
   private static final Logger logger = Logger.getLogger(CachingBlockTest.class.getName());
   
 	private static final String TMP_FOLDER = CachingBlockTest.class.getName();
 
+  @Override
+  protected SignatureStoringBlock newBlock(int capacity, int keySize,
+      Path filePath) throws IOException {
+    return new CachingBlock(capacity, keySize, filePath);
+  }
+	
 	@BeforeClass
 	public static void createTempDirectory() throws IOException {
 		Path globalTempFolder = FileSystems.getDefault().getPath(
@@ -225,12 +231,5 @@ public class CachingBlockTest extends AbstractIndexBlockTest {
   public static void cleanUp() {
     FileUtils.clearAndDeleteDirecotry(tempFolder);
   }
-
-  @Override
-  protected LinkedBlock newBlock(int capacity, int keySize, Path filePath)
-      throws IOException {
-    return new CachingBlock(capacity, keySize, filePath);
-  }
-	
 	
 }

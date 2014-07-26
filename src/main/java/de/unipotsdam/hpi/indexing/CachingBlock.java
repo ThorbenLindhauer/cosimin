@@ -39,7 +39,7 @@ import de.unipotsdam.hpi.util.EncodingUtils;
  * 
  * @author Sebastian
  */
-public class CachingBlock extends AbstractLinkedBlock implements Serializable {
+public class CachingBlock extends AbstractSignatureStoringBlock implements Serializable {
 	
 	private static final long serialVersionUID = 8965038039252466052L;
 	
@@ -72,15 +72,6 @@ public class CachingBlock extends AbstractLinkedBlock implements Serializable {
 		this.file = filePath.toFile();
 		this.keyBuffer = new byte[keySize
 				* (BitSignatureUtil.BASE_TYPE_SIZE >> 3)];
-	}
-
-	/**
-	 * Inserts all pairs into the block.
-	 * 
-	 * @see #bulkLoad(IndexPair[], int, int)
-	 */
-	public void bulkLoad(IndexPair[] pairs) {
-		bulkLoad(pairs, 0, pairs.length);
 	}
 
 	/**

@@ -17,30 +17,30 @@ package de.unipotsdam.hpi.indexing;
 
 import java.io.Serializable;
 
-abstract public class AbstractLinkedBlock implements LinkedBlock, Serializable {
+abstract public class AbstractLinkedBlock<T extends LinkedBlock<T>> implements LinkedBlock<T>, Serializable {
 
 	private static final long serialVersionUID = 2329004979646320986L;
 
-	private LinkedBlock nextBlock;
-	private LinkedBlock previousBlock;
+	private T nextBlock;
+	private T previousBlock;
 	protected int capacity;
 	protected int size;
 	protected int keySize;
 	protected long[] startKey;
 
-	public LinkedBlock getNextBlock() {
+	public T getNextBlock() {
 		return nextBlock;
 	}
 
-	public void setNextBlock(LinkedBlock nextBlock) {
+	public void setNextBlock(T nextBlock) {
 		this.nextBlock = nextBlock;
 	}
 
-	public LinkedBlock getPreviousBlock() {
+	public T getPreviousBlock() {
 		return previousBlock;
 	}
 
-	public void setPreviousBlock(LinkedBlock lastBlock) {
+	public void setPreviousBlock(T lastBlock) {
 		this.previousBlock = lastBlock;
 	}
 
@@ -55,14 +55,5 @@ abstract public class AbstractLinkedBlock implements LinkedBlock, Serializable {
 	public long[] getStartKey() {
 		return startKey;
 	}
-	
-	/**
-   * Inserts all pairs into the block.
-   * 
-   * @see #bulkLoad(IndexPair[], int, int)
-   */
-  public void bulkLoad(IndexPair[] pairs) {
-    bulkLoad(pairs, 0, pairs.length);
-  }
 
 }

@@ -32,14 +32,26 @@ public interface Index extends Serializable {
 	void insertElement(IndexPair pair) throws IOException;
 	
 	void deleteElement(long[] key);
+	
+	/**
+   * Gets the nearest neighbor around the given key. Fetches at least as many smaller
+   * and greater elements as specified by the beam radius. If there are many
+   * elements in the index that match the given key, the middle of the beam is
+   * set arbitrarily in between them.
+   * 
+   * @return an array of greater size than 2 * beamRadius; size may be implementation-specific
+   */
+	IndexPair[] getNearestNeighboursPairs(long[] key, int beamRadius);
 
 	/**
-	 * Gets the nearest neighbor around the given key. Fetches as many smaller
+	 * Gets the nearest neighbor around the given key. Fetches at least as many smaller
 	 * and greater elements as specified by the beam radius. If there are many
 	 * elements in the index that match the given key, the middle of the beam is
 	 * set arbitrarily in between them.
+   * 
+   * @return an array of greater size than 2 * beamRadius; size may be implementation-specific
 	 */
-	IndexPair[] getNearestNeighbours(long[] key, int beamRadius);
+	int[] getNearestNeighboursElementIds(long[] key, int beamRadius);
 
 	void bulkLoad(IndexPair[] keyValuePairs);
 
